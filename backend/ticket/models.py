@@ -57,12 +57,33 @@ class Tag(GeneralModel):
         verbose_name_plural = 'Tags'
         ordering = ['name']
         
-class Comment(GeneralModel):
-    ticket = models.ForeignKey('Ticket', related_name='commnets', on_delete=models.CASCADE, null=True, blank=True)
-    user = models.ForeignKey(User,on_delete=models.CASCADE )
-    commnet = models.TextField('Comment',null=True, blank=True )
-
 
 class Profile(GeneralModel):
     name = models.CharField(max_length=100)
     profile_picture = models.ImageField(upload_to='profile_pics/')
+    
+    
+
+
+class TicketConversation(GeneralModel):
+    
+    
+    STATUS_CHOICES = [
+        ('open', 'Open'),
+        ('closed','Closed'),
+        ]
+    
+    customer = models.ForeignKey(User, related_name='conversations', on_delete=models.CASCADE)
+    operator = models.ForeignKey(User, related_name='handled_conversations', on_delete=models.CASCADE)
+    subject = models.CharField('Subject', max_length=100)
+    status = models.CharField('Status', max_length=30 ,choices=STATUS_CHOICES, default='open')
+    tickets = models.ManyToManyField(Ticket, related_name='conversations')
+    started_at = models.DateField('Started At', auto_now_add=True)
+    ended_at = models.DateTimeField('Ended At', null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.customer}-{self.operator}-{self.subject}-{self.status}-{self.tickets}-{self.started_at}'
+    class Meta:
+        verbose_name = 'TicketConversation'
+        verbose_name_plural = 'TicketConversations'
+        ordering = ['subject']
